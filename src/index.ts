@@ -2,26 +2,31 @@ import { FlashcardInput, MochiClient } from "./mochi-client.js";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { config } from "dotenv";
 import { z } from "zod";
-
-// Load environment variables
-config();
-
-const MOCHI_TOKEN = process.env.MOCHI_TOKEN;
-if (!MOCHI_TOKEN) {
-  throw new Error("MOCHI_TOKEN environment variable is required");
-}
-
-// Create Mochi client
-const mochiClient = new MochiClient(MOCHI_TOKEN);
 
 // Create MCP server
 const server = new McpServer({
   name: "Mochi Flashcards",
   version: "1.0.0"
-});
+},
+  {
+    capabilities: {
+      resources: {},
+      tools: {},
+    },
+  },
+);
 
+const args = process.argv.slice(2);
+if (args.length === 0) {
+  console.error("Please provide a Mochi Token as a command-line argument");
+  process.exit(1);
+}
+
+const mochiToken = args[0];
+
+// Create Mochi client
+const mochiClient = new MochiClient(mochiToken);
 // Tool to create a new flashcard
 server.tool(
   "createFlashcard",

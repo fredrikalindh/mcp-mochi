@@ -101,13 +101,52 @@ Here's how to use the MCP server with the MCP Inspector:
    }
    ```
 
-## Development
 
-To run in development mode with automatic reloading:
-```bash
-npm run dev
+## Setup
+
+### Personal Access Token
+TODO
+
+### Usage with Claude Desktop
+To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
+
+#### Docker
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "MOCHI_API_KEY",
+        "mcp/mochi"
+      ],
+      "env": {
+        "MOCHI_API_KEY": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
 ```
 
-## License
+### NPX
 
-MIT 
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "MOCHI_API_KEY": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
+```
