@@ -2,10 +2,11 @@
 
 import {
   CallToolRequestSchema,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
-  Resource,
 } from "@modelcontextprotocol/sdk/types.js";
 import axios, { AxiosInstance } from "axios";
 
@@ -42,66 +43,111 @@ class MochiError extends Error {
 
 // Zod schemas for request validation
 const CreateCardFieldSchema = z.object({
-  id: z.string(),
-  value: z.string(),
+  id: z.string().describe("Unique identifier for the field"),
+  value: z.string().describe("Value of the field"),
 });
 
 const CreateCardRequestSchema = z.object({
-  content: z.string().min(1),
-  "deck-id": z.string().min(1),
-  "template-id": z.string().optional(),
-  "manual-tags": z.array(z.string()).optional(),
-  fields: z.record(z.string(), CreateCardFieldSchema),
+  content: z
+    .string()
+    .min(1)
+    .describe(
+      "Markdown content of the card. Separate front and back using a horizontal rule (---)"
+    ),
+  "deck-id": z.string().min(1).describe("ID of the deck to create the card in"),
+  "template-id": z
+    .string()
+    .optional()
+    .describe("Optional template ID to use for the card"),
+  "manual-tags": z
+    .array(z.string())
+    .optional()
+    .describe("Optional array of tags to add to the card"),
+  fields: z
+    .record(z.string(), CreateCardFieldSchema)
+    .describe("Map of field IDs to field values"),
 });
 
 const UpdateCardRequestSchema = z.object({
-  content: z.string().optional(),
-  "deck-id": z.string().optional(),
-  "template-id": z.string().optional(),
-  "archived?": z.boolean().optional(),
-  "trashed?": z.string().optional(),
-  fields: z.record(z.string(), CreateCardFieldSchema).optional(),
+  content: z
+    .string()
+    .optional()
+    .describe("Updated markdown content of the card"),
+  "deck-id": z
+    .string()
+    .optional()
+    .describe("ID of the deck to move the card to"),
+  "template-id": z
+    .string()
+    .optional()
+    .describe("Template ID to use for the card"),
+  "archived?": z.boolean().optional().describe("Whether the card is archived"),
+  "trashed?": z.string().optional().describe("Whether the card is trashed"),
+  fields: z
+    .record(z.string(), CreateCardFieldSchema)
+    .optional()
+    .describe("Updated map of field IDs to field values"),
 });
 
 const ListDecksParamsSchema = z.object({
-  bookmark: z.string().optional(),
+  bookmark: z
+    .string()
+    .optional()
+    .describe("Pagination bookmark for fetching next page of results"),
 });
 
 const ListCardsParamsSchema = z.object({
-  "deck-id": z.string().optional(),
-  limit: z.number().min(1).max(100).optional(),
-  bookmark: z.string().optional(),
+  "deck-id": z.string().optional().describe("Get cards from deck ID"),
+  limit: z
+    .number()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe("Number of cards to return per page (1-100)"),
+  bookmark: z
+    .string()
+    .optional()
+    .describe("Pagination bookmark for fetching next page of results"),
 });
 
 const ListTemplatesParamsSchema = z.object({
-  bookmark: z.string().optional(),
+  bookmark: z
+    .string()
+    .optional()
+    .describe("Pagination bookmark for fetching next page of results"),
 });
 
 const TemplateFieldSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  pos: z.string(),
+  id: z.string().describe("Unique identifier for the template field"),
+  name: z.string().describe("Display name of the field"),
+  pos: z.string().describe("Position of the field in the template"),
   options: z
     .object({
-      "multi-line?": z.boolean().optional(),
+      "multi-line?": z
+        .boolean()
+        .optional()
+        .describe("Whether the field supports multiple lines of text"),
     })
-    .optional(),
+    .optional()
+    .describe("Additional options for the field"),
 });
 
 const TemplateSchema = z
   .object({
-    id: z.string(),
-    name: z.string(),
-    content: z.string(),
-    pos: z.string(),
-    fields: z.record(z.string(), TemplateFieldSchema),
+    id: z.string().describe("Unique identifier for the template"),
+    name: z.string().describe("Display name of the template"),
+    content: z.string().describe("Template content in markdown format"),
+    pos: z.string().describe("Position of the template in the list"),
+    fields: z
+      .record(z.string(), TemplateFieldSchema)
+      .describe("Map of field IDs to field definitions"),
   })
   .strip();
 
 const ListTemplatesResponseSchema = z
   .object({
-    bookmark: z.string(),
-    docs: z.array(TemplateSchema),
+    bookmark: z.string().describe("Pagination bookmark for fetching next page"),
+    docs: z.array(TemplateSchema).describe("Array of templates"),
   })
   .strip();
 
@@ -115,12 +161,23 @@ type UpdateCardRequest = z.infer<typeof UpdateCardRequestSchema>;
 // Response Zod schemas
 const CardSchema = z
   .object({
-    id: z.string(),
-    tags: z.array(z.string()),
-    content: z.string(),
-    name: z.string(),
-    "deck-id": z.string(),
-    fields: z.record(z.unknown()).optional(),
+    id: z.string().describe("Unique identifier for the card"),
+    tags: z
+      .array(z.string())
+      .describe("Array of tags associated with the card"),
+    content: z
+      .string()
+      .describe(
+        'Markdown content of the card. Separate front and back of card with "---"'
+      ),
+    name: z.string().describe("Display name of the card"),
+    "deck-id": z.string().describe("ID of the deck containing the card"),
+    fields: z
+      .record(z.unknown())
+      .optional()
+      .describe(
+        "Map of field IDs to field values. Need to match the field IDs in the template"
+      ),
   })
   .strip();
 
@@ -128,8 +185,8 @@ const CreateCardResponseSchema = CardSchema.strip();
 
 const ListCardsResponseSchema = z
   .object({
-    bookmark: z.string(),
-    docs: z.array(CardSchema),
+    bookmark: z.string().describe("Pagination bookmark for fetching next page"),
+    docs: z.array(CardSchema).describe("Array of cards"),
   })
   .strip();
 
@@ -139,17 +196,17 @@ type ListCardsResponse = z.infer<typeof ListCardsResponseSchema>;
 
 const DeckSchema = z
   .object({
-    id: z.string(),
-    sort: z.number(),
-    name: z.string(),
-    archived: z.boolean().optional(),
+    id: z.string().describe("Unique identifier for the deck"),
+    sort: z.number().describe("Sort order of the deck"),
+    name: z.string().describe("Display name of the deck"),
+    archived: z.boolean().optional().describe("Whether the deck is archived"),
   })
   .strip();
 
 const ListDecksResponseSchema = z
   .object({
-    bookmark: z.string(),
-    docs: z.array(DeckSchema),
+    bookmark: z.string().describe("Pagination bookmark for fetching next page"),
+    docs: z.array(DeckSchema).describe("Array of decks"),
   })
   .strip();
 
@@ -229,12 +286,13 @@ export class MochiClient {
 const server = new Server(
   {
     name: "mcp-server/mochi",
-    version: "1.0.2",
+    version: "1.0.3",
   },
   {
     capabilities: {
       tools: {},
       resources: {},
+      prompts: {},
     },
   }
 );
@@ -253,6 +311,9 @@ ALWAYS look up deck-id with the mochi_list_decks tool.
 
 ### content (required)
 The markdown content of the card. Separate front and back using a horizontal rule (---).
+
+### template-id (optional)
+When using the field ids MUST match the template ones. 
 
 ### fields (optional)
 A map of field IDs (keyword) to field values. The field IDs should correspond to the fields defined on the template used by the card.
@@ -293,7 +354,7 @@ A map of field IDs (keyword) to field values. The field IDs should correspond to
     },
     {
       name: "mochi_update_card",
-      description: `Update an existing flashcard in Mochi.`,
+      description: `Update or delete an existing flashcard in Mochi. To delete set trashed to true.`,
       inputSchema: zodToJsonSchema(
         z.object({
           "card-id": z.string(),
@@ -440,6 +501,53 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       throw new Error("Invalid resource URI");
     }
   }
+});
+
+const CreateFlashcardPromptSchema = z.object({
+  input: z
+    .string()
+    .describe("The information to base the flashcard on.")
+    .optional(),
+});
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [
+      {
+        name: "write-flashcard",
+        description: "Write a flashcard based on user-provided information.",
+        arguments: [
+          {
+            name: "input",
+            description: "The information to base the flashcard on.",
+          },
+        ],
+      },
+    ],
+  };
+});
+
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const params = CreateFlashcardPromptSchema.parse(request.params.arguments);
+  const { input } = params;
+
+  return {
+    messages: [
+      {
+        role: "user",
+        content: {
+          type: "text",
+          text: `Create a flashcard using the info below while adhering to these principles: 
+- Keep questions and answers atomic.
+- Utilize cloze prompts when applicable, like "This is a text with {{hidden}} part. Then don't use '---' separator.".
+- Focus on effective retrieval practice by being concise and clear.
+- Make it just challenging enough to reinforce specific facts.
+Input: ${input}
+`,
+        },
+      },
+    ],
+  };
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {

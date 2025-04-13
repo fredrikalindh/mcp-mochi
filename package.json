@@ -1,6 +1,6 @@
 {
   "name": "@fredrika/mcp-mochi",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP server for Mochi flashcard integration",
   "main": "dist/index.js",
   "type": "module",
