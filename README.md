@@ -114,7 +114,7 @@ To use this with Claude Desktop, add the following to your `claude_desktop_confi
 ```json
 {
   "mcpServers": {
-    "github": {
+    "mochi": {
       "command": "docker",
       "args": [
         "run",
@@ -137,11 +137,11 @@ To use this with Claude Desktop, add the following to your `claude_desktop_confi
 ```json
 {
   "mcpServers": {
-    "github": {
+    "mochi": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-github"
+        "@fredrika/mcp-mochi"
       ],
       "env": {
         "MOCHI_API_KEY": "<YOUR_TOKEN>"

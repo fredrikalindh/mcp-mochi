@@ -1,16 +1,33 @@
 {
-  "name": "mcp-mochi",
-  "version": "1.0.0",
+  "name": "@fredrika/mcp-mochi",
+  "version": "1.0.2",
   "description": "MCP server for Mochi flashcard integration",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "mcp-mochi": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-esm src/index.ts",
-    "dev:inspect": "npx @modelcontextprotocol/inspector ts-node-esm src/mochi.ts",
-    "test": "jest"
+    "dev:inspect": "npx @modelcontextprotocol/inspector ts-node-esm src/index.ts",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
+  "keywords": [
+    "mcp",
+    "mochi",
+    "flashcards",
+    "spaced-repetition",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
     "axios": "^1.6.7",
