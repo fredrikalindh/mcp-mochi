@@ -335,8 +335,7 @@ A map of field IDs (keyword) to field values. The field IDs should correspond to
   },
 }
 
-## Good cards:
-- **concise**: as short question and answer as possible.
+## Properties of good flashcards:
 - **focused:** A question or answer involving too much detail will dull your concentration and stimulate incomplete retrievals, leaving some bulbs unlit.
 - **precise** about what they're asking for. Vague questions will elicit vague answers, which won't reliably light the bulbs you're targeting.
 - **consistent** answers, lighting the same bulbs each time you perform the task.
