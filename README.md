@@ -1,14 +1,11 @@
 # Mochi MCP Server
 
-This MCP server provides integration with the Mochi flashcard system, allowing you to manage and review your flashcards through the Model Context Protocol.
+This MCP server provides integration with the Mochi flashcard system, allowing you to manage your flashcards through the Model Context Protocol.
 
 ## Features
 
 - Create, update, and delete flashcards
-- Get flashcards due for review
-- Review flashcards and track progress
-- View study statistics
-- Tag-based organization
+- List flashcards, decks, and templates
 
 ## Setup
 
@@ -33,40 +30,38 @@ This MCP server provides integration with the Mochi flashcard system, allowing y
 
 ## Available Tools
 
-### `createFlashcard`
-Create a new flashcard.
+### `mochi_create_card`
+Create a new flashcard in Mochi.
 - Parameters:
-  - `front`: string (front side content)
-  - `back`: string (back side content)
-  - `tags`: string[] (optional tags)
+  - `content`: string (Markdown content of the card. Separate front and back using a horizontal rule `---`)
+  - `deck-id`: string (ID of the deck to create the card in)
+  - `template-id`: string (optional, template to use for the card)
+  - `manual-tags`: string[] (optional, tags to add to the card)
+  - `fields`: object (map of field IDs to field values, required if using a template)
 
-### `updateFlashcard`
-Update an existing flashcard.
+### `mochi_update_card`
+Update or delete an existing flashcard in Mochi. To delete, set `trashed` to true.
 - Parameters:
-  - `id`: string (flashcard ID)
-  - `front`: string (optional)
-  - `back`: string (optional)
-  - `tags`: string[] (optional)
+  - `card-id`: string (ID of the card to update)
+  - Any updatable card fields (see code for all options)
+  - To delete: set `trashed?` to `'true'` (string)
 
-### `deleteFlashcard`
-Delete a flashcard.
+### `mochi_list_cards`
+List cards (paginated).
 - Parameters:
-  - `id`: string (flashcard ID)
+  - `deck-id`: string (optional, filter by deck)
+  - `limit`: number (optional, 1-100)
+  - `bookmark`: string (optional, for pagination)
 
-### `getDueFlashcards`
-Get a list of flashcards that are due for review.
-- No parameters required
-
-### `reviewFlashcard`
-Submit a review for a flashcard.
+### `mochi_list_decks`
+List all decks.
 - Parameters:
-  - `id`: string (flashcard ID)
-  - `success`: boolean (whether the review was successful)
-  - `timeSpentMs`: number (time spent reviewing in milliseconds)
+  - `bookmark`: string (optional, for pagination)
 
-### `getStats`
-Get study statistics.
-- No parameters required
+### `mochi_list_templates`
+List all templates.
+- Parameters:
+  - `bookmark`: string (optional, for pagination)
 
 ## Example Usage
 
@@ -85,29 +80,34 @@ Here's how to use the MCP server with the MCP Inspector:
 3. Create a new flashcard:
    ```json
    {
-     "tool": "createFlashcard",
+     "tool": "mochi_create_card",
      "params": {
-       "front": "What is MCP?",
-       "back": "Model Context Protocol - a protocol for providing context to LLMs",
-       "tags": ["tech", "protocols"]
+       "content": "What is MCP?\n---\nModel Context Protocol - a protocol for providing context to LLMs",
+       "deck-id": "<YOUR_DECK_ID>"
      }
    }
    ```
 
-4. Get flashcards due for review:
+4. List all decks:
    ```json
    {
-     "tool": "getDueFlashcards"
+     "tool": "mochi_list_decks",
+     "params": {}
    }
    ```
 
+5. Delete a flashcard (set `trashed` to true via update):
+   ```json
+   {
+     "tool": "mochi_update_card",
+     "params": {
+       "card-id": "<CARD_ID>",
+       "trashed?": "true"
+     }
+   }
+   ```
 
-## Setup
-
-### Personal Access Token
-TODO
-
-### Usage with Claude Desktop
+## Usage with Claude Desktop
 To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
 
 #### Docker
