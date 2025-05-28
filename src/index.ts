@@ -58,14 +58,21 @@ const CreateCardRequestSchema = z.object({
   "template-id": z
     .string()
     .optional()
-    .describe("Optional template ID to use for the card"),
+    .nullable()
+    .default(null)
+    .describe(
+      "Optional template ID to use for the card. Defaults to null if not set."
+    ),
   "manual-tags": z
     .array(z.string())
     .optional()
     .describe("Optional array of tags to add to the card"),
   fields: z
     .record(z.string(), CreateCardFieldSchema)
-    .describe("Map of field IDs to field values"),
+    .optional()
+    .describe(
+      "Map of field IDs to field values. Required only when using a template"
+    ),
 });
 
 const UpdateCardRequestSchema = z.object({
@@ -313,12 +320,18 @@ ALWAYS look up deck-id with the mochi_list_decks tool.
 The markdown content of the card. Separate front and back using a horizontal rule (---).
 
 ### template-id (optional)
-When using the field ids MUST match the template ones. 
+When using a template, the field ids MUST match the template ones. If not using a template, omit this field.
 
 ### fields (optional)
-A map of field IDs (keyword) to field values. The field IDs should correspond to the fields defined on the template used by the card.
+A map of field IDs (keyword) to field values. Only required when using a template. The field IDs must correspond to the fields defined on the template.
 
-## Example
+## Example without template
+{
+  "content": "What is the capital of France?\n---\nParis",
+  "deck-id": "btmZUXWM"
+}
+
+## Example with template
 {
   "content": "New card from API. ![](@media/foobar03.png)",
   "deck-id": "btmZUXWM",
@@ -331,8 +344,8 @@ A map of field IDs (keyword) to field values. The field IDs should correspond to
     "JNEnw1e7": {
       "id": "JNEnw1e7",
       "value": "World!"
-    },
-  },
+    }
+  }
 }
 
 ## Properties of good flashcards:

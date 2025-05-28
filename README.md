@@ -110,28 +110,6 @@ Here's how to use the MCP server with the MCP Inspector:
 ## Usage with Claude Desktop
 To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
 
-#### Docker
-```json
-{
-  "mcpServers": {
-    "mochi": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "MOCHI_API_KEY",
-        "mcp/mochi"
-      ],
-      "env": {
-        "MOCHI_API_KEY": "<YOUR_TOKEN>"
-      }
-    }
-  }
-}
-```
-
 ### NPX
 
 ```json
