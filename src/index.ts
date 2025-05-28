@@ -52,7 +52,7 @@ const CreateCardRequestSchema = z.object({
     .string()
     .min(1)
     .describe(
-      "Markdown content of the card. Separate front and back using a horizontal rule (---)"
+      "Markdown content of the card. Separate front and back using a horizontal rule (---) or use brackets for {{cloze deletion}}."
     ),
   "deck-id": z.string().min(1).describe("ID of the deck to create the card in"),
   "template-id": z
